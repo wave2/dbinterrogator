@@ -1,24 +1,32 @@
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.binarystor.mysql</groupId>
-  <artifactId>MySQLDump</artifactId>
-  <packaging>jar</packaging>
-  <version>0.4</version>
-  <name>MySQLDump</name>
-  <url>http://www.BinaryStor.org</url>
-  <organization>
-    <name>Wave2 Limited</name>
-    <url>http://www.wave2.org</url>
-  </organization>
-  <issueManagement>
-    <system>Bugzilla</system>
-    <url>http://www.wave2.org/bugzilla/</url>
-  </issueManagement>
-   <scm>
-    <connection>scm:svn:http://www.wave2.org/svn/mysqldump</connection>
-    <url>http://www.wave2.org/svnweb/Wave2%20Repository/browse/mysqldump</url>
-  </scm>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.binarystor.mysql</groupId>
+    <artifactId>MySQLDump</artifactId>
+    <packaging>jar</packaging>
+    <version>0.4</version>
+    <name>MySQLDump</name>
+    <url>http://www.BinaryStor.org</url>
+    <licenses>
+        <license>
+            <name>BSD License</name>
+            <url>http://www.wave2.org/svn/mysqldump/trunk/LICENSE.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <organization>
+        <name>Wave2 Limited</name>
+        <url>http://www.wave2.org</url>
+    </organization>
+    <issueManagement>
+        <system>Bugzilla</system>
+        <url>http://www.wave2.org/bugzilla/</url>
+    </issueManagement>
+    <scm>
+        <connection>scm:svn:http://www.wave2.org/svn/mysqldump</connection>
+        <url>http://www.wave2.org/svnweb/Wave2%20Repository/browse/mysqldump</url>
+    </scm>
     <build>
         <plugins>
             <plugin>
@@ -40,12 +48,12 @@
         </plugins>
     </build>
     <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>args4j</groupId>
             <artifactId>args4j</artifactId>
