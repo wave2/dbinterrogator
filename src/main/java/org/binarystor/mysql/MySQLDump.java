@@ -289,7 +289,13 @@ public class MySQLDump {
        return dumpCreateTrigger(schema,trigger);
     }
     
-    
+
+    /**
+    * Create script with insert statements: NOTE THIS IS INCOMPLETE AND ANY CONTRIBUTIONS WOULD BE WELCOME
+    *
+    * @param  out    BufferedWriter
+    * @param  table  Table Name
+    */
     public void dumpTable(BufferedWriter out, String table){
          try{
             Statement s = conn.createStatement (ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -298,7 +304,7 @@ public class MySQLDump {
             ResultSetMetaData rsMetaData = rs.getMetaData();
             if (rs.last()){
                 out.write("--\n-- Dumping data for table `" + table + "`\n--\n\n");
-                rs.first();
+                rs.beforeFirst();
             }
             int columnCount = rsMetaData.getColumnCount();
             String prefix = new String("INSERT INTO `" + table + "` (");
