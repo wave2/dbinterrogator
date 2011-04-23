@@ -30,6 +30,11 @@ To run the tests:
 
     $ mvn test
 
+Contributing
+------------
+
+Please do! Go on don't be shy, Fork it!
+
 License
 -------
 
