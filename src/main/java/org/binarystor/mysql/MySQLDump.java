@@ -172,7 +172,7 @@ public class MySQLDump {
     public final void connect(String hostname, String username, String password, String db) throws SQLException {
         connect(hostname, 3306, username, password, db);
     }
- 
+
     /**
      * Check if schema exists if not create it
      *
@@ -192,11 +192,12 @@ public class MySQLDump {
                 stmt.executeUpdate("CREATE DATABASE " + schema);
                 stmt.close();
             }
-        } catch (SQLException sqle) {
+        }
+        catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
     }
-    
+
     /**
      * Check if schema exist and if so drop it 
      *
@@ -216,7 +217,8 @@ public class MySQLDump {
                 stmt.executeUpdate("DROP DATABASE " + schema);
                 stmt.close();
             }
-        } catch (SQLException sqle) {
+        }
+        catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
     }
@@ -452,31 +454,31 @@ public class MySQLDump {
                 }
             }
             String postfix = new String();
+            String separator = ",";
             int count = 0;
             while (rs.next()) {
                 postfix = "";
                 for (int i = 1; i <= columnCount; i++) {
                     if (i == columnCount) {
-                        //System.err.println(rs.getMetaData().getColumnClassName(i));
-                        postfix += "'" + rs.getString(i) + "');\n";
+                        separator = ");\n";
+                    }
+                    //Convert LongBlob data to hex string to avoid character encoding issues
+                    if (rs.getMetaData().getColumnTypeName(i).equalsIgnoreCase("LONGBLOB")) {
+                        try {
+                            postfix += "UNHEX('" + byteArrayToHexString(rs.getBytes(i)) + "')" + separator;
+                        }
+                        catch (Exception e) {
+                            postfix += "NULL,";
+                        }
                     } else {
-                        //System.err.println(rs.getMetaData().getColumnTypeName(i));
-                        if (rs.getMetaData().getColumnTypeName(i).equalsIgnoreCase("LONGBLOB")) {
-                            try {
-                                postfix += "'" + escapeString(rs.getBytes(i)).toString() + "',";
-                            }
-                            catch (Exception e) {
-                                postfix += "NULL,";
-                            }
-                        } else {
-                            try {
-                                postfix += "'" + escapeString(rs.getBytes(i)).toString() + "',";
-                            }
-                            catch (Exception e) {
-                                postfix += "NULL,";
-                            }
+                        try {
+                            postfix += "'" + escapeString(rs.getBytes(i)).toString() + "'" + separator;
+                        }
+                        catch (Exception e) {
+                            postfix += "NULL,";
                         }
                     }
+
                 }
                 out.write(prefix + postfix);
                 ++count;
@@ -769,12 +771,31 @@ public class MySQLDump {
      */
     public void setSchema(String schema) {
         this.schema = schema;
-        try{
-        conn.setCatalog(schema);
-        }catch (SQLException sqle){
+        try {
+            conn.setCatalog(schema);
+        }
+        catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
+    }
+
+    /**
+     * Convert bytes to hex
+     *
+     * @param  bIn       String to be converted to hex passed in as byte array
+     * @return bOut      MySQL compatible hex string
+     */
+    public static String byteArrayToHexString(byte[] bIn) {
+        StringBuilder sb = new StringBuilder(bIn.length * 2);
+        for (int i = 0; i < bIn.length; i++) {
+            int v = bIn[i] & 0xff;
+            if (v < 16) {
+                sb.append('0');
+            }
+            sb.append(Integer.toHexString(v));
         }
+        return sb.toString().toUpperCase();
+    }
 
     /**
      * Escape string ready for insert via mysql client
