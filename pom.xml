@@ -5,7 +5,7 @@
     <groupId>org.binarystor.mysql</groupId>
     <artifactId>MySQLDump</artifactId>
     <packaging>jar</packaging>
-    <version>0.6</version>
+    <version>0.6.0</version>
     <name>MySQLDump</name>
     <url>http://www.BinaryStor.org</url>
     <licenses>

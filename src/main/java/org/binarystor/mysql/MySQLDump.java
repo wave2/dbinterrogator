@@ -32,6 +32,7 @@ package org.binarystor.mysql;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.IOException;
@@ -441,7 +442,7 @@ public class MySQLDump {
             ResultSet rs = s.getResultSet();
             ResultSetMetaData rsMetaData = rs.getMetaData();
             if (rs.last()) {
-                out.write("--\n-- Dumping data for table `" + table + "`\n--\n\n");
+                out.write("\n\n--\n-- Dumping data for table `" + table + "`\n--\n\n");
                 rs.beforeFirst();
             }
             int columnCount = rsMetaData.getColumnCount();
@@ -462,7 +463,7 @@ public class MySQLDump {
                     if (i == columnCount) {
                         separator = ");\n";
                     }
-                    //Convert LongBlob data to hex string to avoid character encoding issues
+                    //[#1] Convert LongBlob data to hex string to avoid character encoding issues
                     if (rs.getMetaData().getColumnTypeName(i).equalsIgnoreCase("LONGBLOB")) {
                         try {
                             postfix += "UNHEX('" + byteArrayToHexString(rs.getBytes(i)) + "')" + separator;
@@ -938,6 +939,13 @@ public class MySQLDump {
             out.flush();
             out.close();
             this.cleanup();
+            BufferedReader sqlFile = new BufferedReader(new FileReader(temp));
+            String sqlLine = new String();
+            while ((sqlLine = sqlFile.readLine()) != null) {
+                System.out.println(sqlLine);
+            }
+            sqlFile.close();
+            temp.delete();
         }
         catch (SQLException se) {
             System.err.println(se.getMessage());
