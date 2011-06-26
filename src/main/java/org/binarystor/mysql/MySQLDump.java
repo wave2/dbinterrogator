@@ -932,7 +932,6 @@ public class MySQLDump {
             this.connect(hostname, username, password, schema);
             out.write(getHeader());
             for (String arg : arguments) {
-                System.out.println(arg);
                 out.write(dumpCreateTable(arg));
                 this.dumpTable(out, arg);
             }
