@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.binarystor.mysql;
+package org.dbinterrogator.mysql;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -51,7 +51,7 @@ import org.kohsuke.args4j.*;
  *
  * @author Alan Snelson
  */
-public class MySQLDump {
+public class MySQLInstance {
 
     //Command Line Arguments
     @Option(name = "--help")
@@ -91,20 +91,20 @@ public class MySQLDump {
     }
 
     /**
-     * Default constructor for MySQLDump.
+     * Default constructor for MySQLInstance.
      */
-    public MySQLDump() {
+    public MySQLInstance() {
         loadProperties();
     }
 
     /**
-     * Create a new instance of MySQLDump using default database.
+     * Create a new instance of MySQLInstance using default database.
      *
      * @param  hostname  MySQL Server Hostname
      * @param  username  MySQL Username
      * @param  password  MySQL Password
      */
-    public MySQLDump(String hostname, String username, String password) throws SQLException {
+    public MySQLInstance(String hostname, String username, String password) throws SQLException {
         loadProperties();
         try {
             connect(hostname, username, password, "mysql");
@@ -115,14 +115,14 @@ public class MySQLDump {
     }
 
     /**
-     * Create a new instance of MySQLDump using supplied database.
+     * Create a new instance of MySQLInstance using supplied database.
      *
      * @param  hostname  MySQL Server Hostname
      * @param  username  MySQL Username
      * @param  password  MySQL Password
      * @param  db        Default database
      */
-    public MySQLDump(String host, String username, String password, String db) throws SQLException {
+    public MySQLInstance(String host, String username, String password, String db) throws SQLException {
         loadProperties();
         try {
             connect(host, username, password, db);
@@ -569,9 +569,9 @@ public class MySQLDump {
     }
 
     /**
-     * Get MySQLDump version
+     * Get MySQLInstance version
      *
-     * @return MySQLDump version
+     * @return MySQLInstance version
      */
     public String getVersion() {
         return properties.getProperty("application.version");
@@ -856,9 +856,9 @@ public class MySQLDump {
     }
 
     /**
-     * Return MySQLDump header for output to file
+     * Return MySQLInstance header for output to file
      *
-     * @return MySQLDump header
+     * @return MySQLInstance header
      */
     private String getHeader() {
         //return Dump Header        
@@ -866,22 +866,22 @@ public class MySQLDump {
     }
 
     /**
-     * Main entry point for MySQLDump when run from command line
+     * Main entry point for MySQLInstance when run from command line
      *
      * @param  args  Command line arguments
      */
     public static void main(String[] args) {
-        new MySQLDump().doMain(args);
+        new MySQLInstance().doMain(args);
     }
 
     /**
-     * Parse command line arguments and run MySQLDump
+     * Parse command line arguments and run MySQLInstance
      *
      * @param  args  Command line arguments
      */
     public int doMain(String[] args) {
 
-        String usage = "Usage: java -jar MySQLDump.jar [OPTIONS] database [tables]\nOR     java -jar MySQLDump.jar [OPTIONS] --databases [OPTIONS] DB1 [DB2 DB3...]\nOR     java -jar MySQLDump.jar [OPTIONS] --all-databases [OPTIONS]\nFor more options, use java -jar MySQLDump.jar --help";
+        String usage = "Usage: java -jar MySQLInstance.jar [OPTIONS] database [tables]\nOR     java -jar MySQLInstance.jar [OPTIONS] --databases [OPTIONS] DB1 [DB2 DB3...]\nOR     java -jar MySQLInstance.jar [OPTIONS] --all-databases [OPTIONS]\nFor more options, use java -jar MySQLInstance.jar --help";
         CmdLineParser parser = new CmdLineParser(this);
 
         // if you have a wider console, you could increase the value;
@@ -905,7 +905,7 @@ public class MySQLDump {
         }
         catch (CmdLineException e) {
             if (e.getMessage().equalsIgnoreCase("Print Help")) {
-                System.out.println("MySQLDump.java Ver " + properties.getProperty("application.version") + "\nThis software comes with ABSOLUTELY NO WARRANTY. This is free software,\nand you are welcome to modify and redistribute it under the BSD license" + "\n\n" + usage);
+                System.out.println("MySQLInstance.java Ver " + properties.getProperty("application.version") + "\nThis software comes with ABSOLUTELY NO WARRANTY. This is free software,\nand you are welcome to modify and redistribute it under the BSD license" + "\n\n" + usage);
                 return 0;
             }
             // if there's a problem in the command line,
