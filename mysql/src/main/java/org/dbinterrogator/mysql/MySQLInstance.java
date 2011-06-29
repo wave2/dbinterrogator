@@ -32,20 +32,13 @@ package org.dbinterrogator.mysql;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.BufferedWriter;
-import java.io.StringWriter;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.io.IOUtils;
-import org.kohsuke.args4j.*;
 
 /**
  *
@@ -53,21 +46,8 @@ import org.kohsuke.args4j.*;
  */
 public class MySQLInstance {
 
-    //Command Line Arguments
-    @Option(name = "--help")
-    private boolean help;
-    @Option(name = "-h", usage = "MySQL Server Hostname")
-    private String hostname;
-    @Option(name = "-u", usage = "MySQL Username")
-    private String username;
-    @Option(name = "-p", usage = "MySQL Password")
-    private String password;
-    @Option(name = "-v")
-    private boolean verbose;
-    // receives other command line parameters than options
-    @Argument
-    private List<String> arguments = new ArrayList<String>();
     //Database properties
+    private String hostname = null;
     private String schema = null;
     private Connection conn = null;
     private DatabaseMetaData databaseMetaData;
@@ -150,9 +130,6 @@ public class MySQLInstance {
             databaseProductMinorVersion = databaseMetaData.getDatabaseMinorVersion();
             this.hostname = hostname;
             schema = db;
-            if (verbose) {
-                System.out.println("Database connection established");
-            }
         }
         catch (SQLException se) {
             throw se;
@@ -863,115 +840,6 @@ public class MySQLInstance {
     private String getHeader() {
         //return Dump Header        
         return "-- BinaryStor MySQL Dump " + properties.getProperty("application.version") + "\n--\n-- Host: " + hostname + "    " + "Database: " + schema + "\n-- ------------------------------------------------------\n-- Server Version: " + databaseProductVersion + "\n--";
-    }
-
-    /**
-     * Main entry point for MySQLInstance when run from command line
-     *
-     * @param  args  Command line arguments
-     */
-    public static void main(String[] args) {
-        new MySQLInstance().doMain(args);
-    }
-
-    /**
-     * Parse command line arguments and run MySQLInstance
-     *
-     * @param  args  Command line arguments
-     */
-    public int doMain(String[] args) {
-
-        String usage = "Usage: java -jar MySQLInstance.jar [OPTIONS] database [tables]\nOR     java -jar MySQLInstance.jar [OPTIONS] --databases [OPTIONS] DB1 [DB2 DB3...]\nOR     java -jar MySQLInstance.jar [OPTIONS] --all-databases [OPTIONS]\nFor more options, use java -jar MySQLInstance.jar --help";
-        CmdLineParser parser = new CmdLineParser(this);
-
-        // if you have a wider console, you could increase the value;
-        // here 80 is also the default
-        parser.setUsageWidth(80);
-
-        try {
-            // parse the arguments.
-            parser.parseArgument(args);
-
-            if (help) {
-                throw new CmdLineException("Print Help");
-            }
-
-            // after parsing arguments, you should check
-            // if enough arguments are given.
-            if (arguments.isEmpty()) {
-                throw new CmdLineException("No argument is given");
-            }
-
-        }
-        catch (CmdLineException e) {
-            if (e.getMessage().equalsIgnoreCase("Print Help")) {
-                System.out.println("MySQLInstance.java Ver " + properties.getProperty("application.version") + "\nThis software comes with ABSOLUTELY NO WARRANTY. This is free software,\nand you are welcome to modify and redistribute it under the BSD license" + "\n\n" + usage);
-                return 0;
-            }
-            // if there's a problem in the command line,
-            // you'll get this exception. this will report
-            // an error message.
-            System.err.println(e.getMessage());
-            // print usage.
-            System.err.println(usage);
-            return 1;
-        }
-
-
-        //Do we have a hostname? if not use localhost as default
-        if (hostname == null) {
-            hostname = "localhost";
-        }
-        //First argument here should be database
-        schema = arguments.remove(0);
-
-        try {
-            //Create temporary file to hold SQL output.
-            File temp = File.createTempFile(schema, ".sql");
-            BufferedWriter out = new BufferedWriter(new FileWriter(temp));
-            this.connect(hostname, username, password, schema);
-            out.write(getHeader());
-            for (String arg : arguments) {
-                out.write(dumpCreateTable(arg));
-                this.dumpTable(out, arg);
-            }
-            out.flush();
-            out.close();
-            this.cleanup();
-            BufferedReader sqlFile = new BufferedReader(new FileReader(temp));
-            String sqlLine = new String();
-            while ((sqlLine = sqlFile.readLine()) != null) {
-                System.out.println(sqlLine);
-            }
-            sqlFile.close();
-            temp.delete();
-        }
-        catch (SQLException se) {
-            System.err.println(se.getMessage());
-            return 1;
-        }
-        catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
-            return 1;
-        }
-        return 0;
-    }
-
-    /**
-     * Convert InputStream to String
-     *
-     * @param  stream InputStream to convert
-     * @return string representation of InputStream
-     */
-    private String streamToString(InputStream stream) {
-        StringWriter writer = new StringWriter();
-        try {
-            IOUtils.copy(stream, writer);
-        }
-        catch (IOException ioe) {
-            System.err.print(ioe.getMessage());
-        }
-        return writer.toString();
     }
 
     /**
