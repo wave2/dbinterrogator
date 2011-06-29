@@ -28,5 +28,6 @@
     </scm>
     <modules>
         <module>mysql</module>
+	<module>postgresql</module>
     </modules>
 </project>
