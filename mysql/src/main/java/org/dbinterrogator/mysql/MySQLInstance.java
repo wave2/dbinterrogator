@@ -34,17 +34,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Alan Snelson
  */
-public class MySQLInstance {
+public class MySQLInstance implements Instance {
 
     //Database properties
     private String hostname = null;
@@ -64,8 +69,7 @@ public class MySQLInstance {
     private void loadProperties() {
         try {
             properties.load(getClass().getResourceAsStream("/application.properties"));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -88,8 +92,7 @@ public class MySQLInstance {
         loadProperties();
         try {
             connect(hostname, username, password, "mysql");
-        }
-        catch (SQLException se) {
+        } catch (SQLException se) {
             throw se;
         }
     }
@@ -106,8 +109,7 @@ public class MySQLInstance {
         loadProperties();
         try {
             connect(host, username, password, db);
-        }
-        catch (SQLException se) {
+        } catch (SQLException se) {
             throw se;
         }
     }
@@ -130,11 +132,9 @@ public class MySQLInstance {
             databaseProductMinorVersion = databaseMetaData.getDatabaseMinorVersion();
             this.hostname = hostname;
             schema = db;
-        }
-        catch (SQLException se) {
+        } catch (SQLException se) {
             throw se;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.err.println("Cannot connect to database server");
         }
     }
@@ -170,8 +170,7 @@ public class MySQLInstance {
                 stmt.executeUpdate("CREATE DATABASE " + schema);
                 stmt.close();
             }
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
     }
@@ -195,8 +194,7 @@ public class MySQLInstance {
                 stmt.executeUpdate("DROP DATABASE " + schema);
                 stmt.close();
             }
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
     }
@@ -220,8 +218,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 createDatabase = rs.getString("Create Database") + ";";
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return createDatabase;
@@ -263,8 +260,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 createEvent += rs.getString("Create Event") + ";";
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return createEvent;
@@ -296,8 +292,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 createRoutine += rs.getString("ROUTINE_DEFINITION") + ";";
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
             createRoutine = "";
         }
@@ -305,13 +300,13 @@ public class MySQLInstance {
     }
 
     /**
-     * Convenience method for objects created with schema - calls dumpCreateTable
+     * Convenience method for objects created with schema - calls getCreateTable
      *
      * @param table Table to dump
      * @return Create table definition
      */
-    public String dumpCreateTable(String table) {
-        return dumpCreateTable(schema, table);
+    public String getCreateTable(String table) {
+        return getCreateTable(schema, table);
     }
 
     /**
@@ -321,19 +316,22 @@ public class MySQLInstance {
      * @param table  Table name
      * @return Create table definition
      */
-    public String dumpCreateTable(String schema, String table) {
+    public String getCreateTable(String schema, String table) {
         String createTable = "--\n-- Table structure for table `" + table + "`\n--\n\n";
         try {
-            Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            s.executeQuery("SHOW CREATE TABLE `" + schema + "`.`" + table + "`");
-            ResultSet rs = s.getResultSet();
+            PreparedStatement stmt = conn.prepareStatement(convertStreamToString(getClass().getResourceAsStream("getCreateTable.sql")),ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            //Schema
+            stmt.setString(1, schema);
+            stmt.setString(2, table);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 createTable += rs.getString("Create Table") + ";";
             }
-        }
-        catch (SQLException e) {
-            System.err.println(e.getMessage());
+        } catch (SQLException sqle) {
+            System.err.println(sqle.getMessage());
             createTable = "";
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
         }
         return createTable;
     }
@@ -364,8 +362,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 createTrigger += rs.getString("SQL Original Statement") + ";";
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
             createTrigger = "";
         }
@@ -398,8 +395,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 createView += rs.getString("Create View") + ";";
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
             createView = "";
         }
@@ -444,15 +440,13 @@ public class MySQLInstance {
                     if (rs.getMetaData().getColumnTypeName(i).equalsIgnoreCase("LONGBLOB")) {
                         try {
                             postfix += "UNHEX('" + byteArrayToHexString(rs.getBytes(i)) + "')" + separator;
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             postfix += "NULL,";
                         }
                     } else {
                         try {
                             postfix += "'" + escapeString(rs.getBytes(i)).toString() + "'" + separator;
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             postfix += "NULL,";
                         }
                     }
@@ -463,11 +457,9 @@ public class MySQLInstance {
             }
             rs.close();
             s.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
     }
@@ -481,8 +473,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 variables.put(rs.getString(1), rs.getString(2));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return variables;
@@ -507,10 +498,10 @@ public class MySQLInstance {
         String line;
         StringBuilder sb = new StringBuilder();
         try {
-            while (( line = script.readLine() ) != null) {
+            while ((line = script.readLine()) != null) {
                 //Strip standalone comments
-                if (!( line.startsWith("--") || line.startsWith("/*") || line.length() == 0 )) {
-                    sb.append(line.trim() + " ");
+                if (!(line.startsWith("--") || line.startsWith("/*") || line.length() == 0)) {
+                    sb.append(line.trim()).append(" ");
                 }
             }
             conn.setCatalog(schema);
@@ -525,18 +516,15 @@ public class MySQLInstance {
             conn.commit();
             conn.setAutoCommit(true);
             stmt.close();
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             if (conn != null) {
                 try {
                     conn.rollback();
                     conn.setAutoCommit(true);
                     return sqle.getMessage();
-                }
-                catch (SQLException e) {
+                } catch (SQLException e) {
                     return e.getMessage();
                 }
 
@@ -572,8 +560,7 @@ public class MySQLInstance {
                     events.add(rs.getString(1));
                 }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return events;
@@ -616,8 +603,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 routines.add(rs.getString(1));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
@@ -641,8 +627,7 @@ public class MySQLInstance {
                     schemata.add(rs.getString("Database"));
                 }
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
@@ -669,8 +654,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 tables.add(rs.getString(1));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
@@ -696,8 +680,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 triggers.add(rs.getString(1));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
@@ -725,8 +708,7 @@ public class MySQLInstance {
             while (rs.next()) {
                 views.add(rs.getString(1));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
@@ -751,8 +733,7 @@ public class MySQLInstance {
         this.schema = schema;
         try {
             conn.setCatalog(schema);
-        }
-        catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
         }
     }
@@ -842,6 +823,17 @@ public class MySQLInstance {
         return "-- BinaryStor MySQL Dump " + properties.getProperty("application.version") + "\n--\n-- Host: " + hostname + "    " + "Database: " + schema + "\n-- ------------------------------------------------------\n-- Server Version: " + databaseProductVersion + "\n--";
     }
 
+    public static String convertStreamToString(InputStream is) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        is.close();
+        return sb.toString();
+    }
+
     /**
      * Close database connection
      *
@@ -850,11 +842,7 @@ public class MySQLInstance {
     public int cleanup() {
         try {
             conn.close();
-            if (verbose) {
-                System.out.println("Database connection terminated");
-            }
-        }
-        catch (Exception e) { /* ignore close errors */ }
+        } catch (Exception e) { /* ignore close errors */ }
         return 1;
     }
 }
