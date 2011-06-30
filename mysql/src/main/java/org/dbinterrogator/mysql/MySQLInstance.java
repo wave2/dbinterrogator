@@ -267,13 +267,13 @@ public class MySQLInstance implements Instance {
     }
 
     /**
-     * Convenience method for objects created with schema - calls dumpCreateRoutine
+     * Convenience method for objects created with schema - calls getCreateRoutine
      *
      * @param routine Routine to dump
      * @return Create routine definition
      */
-    public String dumpCreateRoutine(String routine) {
-        return dumpCreateRoutine(schema, routine);
+    public String getCreateRoutine(String routine) {
+        return getCreateRoutine(schema, routine);
     }
 
     /**
@@ -283,18 +283,23 @@ public class MySQLInstance implements Instance {
      * @param routine  Routine name
      * @return Create routine definition
      */
-    public String dumpCreateRoutine(String schema, String routine) {
+    public String getCreateRoutine(String schema, String routine) {
         String createRoutine = "--\n-- Routine structure for routine `" + routine + "`\n--\n\n";
         try {
-            Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            s.executeQuery("SELECT ROUTINE_DEFINITION FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_NAME='" + routine + "'");
-            ResultSet rs = s.getResultSet();
+            PreparedStatement stmt = conn.prepareStatement(convertStreamToString(getClass().getResourceAsStream("getCreateRoutine.sql")),ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            stmt.setString(1, schema);
+            stmt.setString(2, routine);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 createRoutine += rs.getString("ROUTINE_DEFINITION") + ";";
             }
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            rs.close();
+            stmt.close();
+        } catch (SQLException sqle) {
+            System.err.println(sqle.getMessage());
             createRoutine = "";
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
         }
         return createRoutine;
     }
@@ -320,13 +325,14 @@ public class MySQLInstance implements Instance {
         String createTable = "--\n-- Table structure for table `" + table + "`\n--\n\n";
         try {
             PreparedStatement stmt = conn.prepareStatement(convertStreamToString(getClass().getResourceAsStream("getCreateTable.sql")),ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            //Schema
             stmt.setString(1, schema);
             stmt.setString(2, table);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 createTable += rs.getString("Create Table") + ";";
             }
+            rs.close();
+            stmt.close();
         } catch (SQLException sqle) {
             System.err.println(sqle.getMessage());
             createTable = "";
@@ -370,13 +376,13 @@ public class MySQLInstance implements Instance {
     }
 
     /**
-     * Convenience method for objects created with schema - calls dumpCreateView
+     * Convenience method for objects created with schema - calls getCreateView
      *
      * @param  view View name
      * @return Create view definition
      */
-    public String dumpCreateView(String view) {
-        return dumpCreateView(schema, view);
+    public String getCreateView(String view) {
+        return getCreateView(schema, view);
     }
 
     /**
@@ -386,7 +392,7 @@ public class MySQLInstance implements Instance {
      * @param table  Table name
      * @return Create table definition
      */
-    public String dumpCreateView(String schema, String view) {
+    public String getCreateView(String schema, String view) {
         String createView = "--\n-- View definition for view `" + view + "`\n--\n\n";
         try {
             Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -823,6 +829,13 @@ public class MySQLInstance implements Instance {
         return "-- BinaryStor MySQL Dump " + properties.getProperty("application.version") + "\n--\n-- Host: " + hostname + "    " + "Database: " + schema + "\n-- ------------------------------------------------------\n-- Server Version: " + databaseProductVersion + "\n--";
     }
 
+    /**
+     * Convert InputStream into String
+     *
+     * @param is InputStream
+     * 
+     * @return String
+     */  
     public static String convertStreamToString(InputStream is) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();

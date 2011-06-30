@@ -42,9 +42,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -125,23 +122,6 @@ public class MySQLInstanceTest {
         instance.connect(hostname, port, username, password, schema);
         instance.cleanup();
     }
-    
-        /**
-     * Convert InputStream to String
-     *
-     * @param  stream InputStream to convert
-     * @return string representation of InputStream
-     */
-    private String streamToString(InputStream stream) {
-        StringWriter writer = new StringWriter();
-        try {
-            IOUtils.copy(stream, writer);
-        }
-        catch (IOException ioe) {
-            System.err.print(ioe.getMessage());
-        }
-        return writer.toString();
-    }
 
     /**
      * Test connection using hostname, username, password and db
@@ -201,7 +181,7 @@ public class MySQLInstanceTest {
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
             String expResult = "582ca3f7cbaf4edcc1b445f8ea90b503";
-            String result = instance.dumpCreateTable(table);
+            String result = instance.getCreateTable(table);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -213,13 +193,13 @@ public class MySQLInstanceTest {
      * Test of dumpCreateTable method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateTable_String_String() {
+    public void testGetCreateTable_String_String() {
         System.out.println("dumpCreateTable");
         String table = "employees";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "582ca3f7cbaf4edcc1b445f8ea90b503";
-            String result = instance.dumpCreateTable(schema, table);
+            String result = instance.getCreateTable(schema, table);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -231,13 +211,13 @@ public class MySQLInstanceTest {
      * Test of dumpCreateView method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateView_String() {
+    public void testGetCreateView_String() {
         System.out.println("dumpCreateView");
         String view = "employees_view";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
             String expResult = "VIEW `employees_view` AS";
-            String result = instance.dumpCreateView(view);
+            String result = instance.getCreateView(view);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -249,13 +229,13 @@ public class MySQLInstanceTest {
      * Test of dumpCreateView method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateView_String_String() {
+    public void testGetCreateView_String_String() {
         System.out.println("dumpCreateView");
         String view = "employees_view";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "`employees_view` AS";
-            String result = instance.dumpCreateView(schema, view);
+            String result = instance.getCreateView(schema, view);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -285,13 +265,13 @@ public class MySQLInstanceTest {
      * Test of dumpCreateRoutine method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateRoutine_String_String() {
+    public void testGetCreateRoutine_String_String() {
         System.out.println("dumpCreateRoutine");
         String routine = "emp_dept_id";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "emp_no = employee_id";
-            String result = instance.dumpCreateRoutine(schema, routine);
+            String result = instance.getCreateRoutine(schema, routine);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -300,16 +280,16 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateRoutine method, of class MySQLInstance.
+     * Test of getCreateRoutine method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateRoutine_String() {
+    public void testGetCreateRoutine_String() {
         System.out.println("dumpCreateRoutine");
         String routine = "emp_dept_id";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
             String expResult = "emp_no = employee_id";
-            String result = instance.dumpCreateRoutine(routine);
+            String result = instance.getCreateRoutine(routine);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -566,18 +546,6 @@ public class MySQLInstanceTest {
         catch (SQLException se) {
             System.err.println(se.getMessage());
         }
-    }
-
-    /**
-     * Test of doMain method, of class MySQLInstance.
-     */
-    @Test
-    public void testDoMain() throws Exception {
-        System.out.println("doMain");
-        String[] args = {};
-        MySQLInstance instance = new MySQLInstance();
-        int result = instance.doMain(args);
-        assertEquals(1,result);
     }
 
     /**
