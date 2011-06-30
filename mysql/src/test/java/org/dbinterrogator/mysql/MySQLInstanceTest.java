@@ -35,9 +35,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
@@ -135,16 +133,16 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateDatabase method, of class MySQLInstance.
+     * Test of getCreateDatabase method of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateDatabase() {
-        System.out.println("dumpCreateDatabase");
+    public void testGetCreateDatabase() {
+        System.out.println("getCreateDatabase");
         String database = "mysql";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "CREATE DATABASE `mysql`";
-            String result = instance.dumpCreateDatabase(database);
+            String result = instance.getCreateDatabase(database);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -154,16 +152,16 @@ public class MySQLInstanceTest {
 
 
     /**
-     * Test of dumpCreateEvent method, of class MySQLInstance.
+     * Test of getCreateEvent method of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateEvent_String_String() {
-        System.out.println("dumpCreateEvent");
+    public void testgetCreateEvent_String_String() {
+        System.out.println("getCreateEvent");
         String event = "switch_gender";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "gender = 'F'";
-            String result = instance.dumpCreateEvent(schema, event);
+            String result = instance.getCreateEvent(schema, event);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -172,11 +170,11 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateTable method, of class MySQLInstance.
+     * Test of getCreateTable method of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateTable_String() {
-        System.out.println("dumpCreateTable");
+    public void testGetCreateTable_String() {
+        System.out.println("getCreateTable");
         String table = "employees";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
@@ -190,11 +188,11 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateTable method, of class MySQLInstance.
+     * Test of getCreateTable method of class MySQLInstance.
      */
     @Test
     public void testGetCreateTable_String_String() {
-        System.out.println("dumpCreateTable");
+        System.out.println("getCreateTable");
         String table = "employees";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
@@ -244,16 +242,16 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateEvent method, of class MySQLInstance.
+     * Test of getCreateEvent method of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateEvent_String() {
-        System.out.println("dumpCreateEvent");
+    public void testGetCreateEvent_String() {
+        System.out.println("getCreateEvent");
         String event = "switch_gender";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
             String expResult = "gender = 'F'";
-            String result = instance.dumpCreateEvent(event);
+            String result = instance.getCreateEvent(event);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -284,7 +282,7 @@ public class MySQLInstanceTest {
      */
     @Test
     public void testGetCreateRoutine_String() {
-        System.out.println("dumpCreateRoutine");
+        System.out.println("getCreateRoutine");
         String routine = "emp_dept_id";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
@@ -298,16 +296,16 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateTrigger method, of class MySQLInstance.
+     * Test of getCreateTrigger method of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateTrigger_String_String() {
-        System.out.println("dumpCreateTrigger");
+    public void testGetCreateTrigger_String_String() {
+        System.out.println("getCreateTrigger");
         String trigger = "set_hire_date";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "1976-03-19";
-            String result = instance.dumpCreateTrigger(schema, trigger);
+            String result = instance.getCreateTrigger(schema, trigger);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -316,16 +314,16 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpCreateTrigger method, of class MySQLInstance.
+     * Test of getCreateTrigger method, of class MySQLInstance.
      */
     @Test
-    public void testDumpCreateTrigger_String() {
-        System.out.println("dumpCreateTrigger");
+    public void testGetCreateTrigger_String() {
+        System.out.println("getCreateTrigger");
         String trigger = "set_hire_date";
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password, schema);
             String expResult = "1976-03-19";
-            String result = instance.dumpCreateTrigger(trigger);
+            String result = instance.getCreateTrigger(trigger);
             assertThat(result, JUnitMatchers.containsString(expResult));
         }
         catch (SQLException se) {
@@ -334,15 +332,15 @@ public class MySQLInstanceTest {
     }
 
     /**
-     * Test of dumpGlobalVariables method, of class MySQLInstance.
+     * Test of getGlobalVariables method of class MySQLInstance.
      */
     @Test
-    public void testDumpGlobalVariables() {
-        System.out.println("dumpGlobalVariables");
+    public void testGetGlobalVariables() {
+        System.out.println("getGlobalVariables");
         try {
             MySQLInstance instance = new MySQLInstance(hostname, username, password);
             String expResult = "datadir";
-            Map<String, String> result = instance.dumpGlobalVariables();
+            Map<String, String> result = instance.getGlobalVariables();
             assert ( result.containsKey(expResult) );
         }
         catch (SQLException se) {

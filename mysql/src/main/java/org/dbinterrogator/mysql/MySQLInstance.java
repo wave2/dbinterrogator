@@ -31,19 +31,15 @@ package org.dbinterrogator.mysql;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -122,6 +118,7 @@ public class MySQLInstance implements Instance {
      * @param  password  MySQL Password
      * @param  db        Default database
      */
+    @Override
     public void connect(String hostname, int port, String username, String password, String db) throws SQLException {
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -147,6 +144,7 @@ public class MySQLInstance implements Instance {
      * @param  password  MySQL Password
      * @param  db        Default database
      */
+    @Override
     public final void connect(String hostname, String username, String password, String db) throws SQLException {
         connect(hostname, 3306, username, password, db);
     }
@@ -156,6 +154,7 @@ public class MySQLInstance implements Instance {
      *
      * @param  schema Schema name
      */
+    @Override
     public void createSchema(String schema) {
         //Ok lets see if the database exists - if not create it
         try {
@@ -180,6 +179,7 @@ public class MySQLInstance implements Instance {
      *
      * @param  schema Schema name
      */
+    @Override
     public void dropSchema(String schema) {
         //Ok lets see if the database exists - if so drop it
         try {
@@ -199,17 +199,14 @@ public class MySQLInstance implements Instance {
         }
     }
 
-    public File dumpAllDatabases() {
-        return null;
-    }
-
     /**
      * Get create database script
      *
      * @param  database Database name
      * @return Create database script
      */
-    public String dumpCreateDatabase(String database) {
+    @Override
+    public String getCreateDatabase(String database) {
         String createDatabase = null;
         try {
             Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -224,24 +221,15 @@ public class MySQLInstance implements Instance {
         return createDatabase;
     }
 
-    public File dumpDatabase(String database) {
-        //TODO Need to dump database structure and data
-        return null;
-    }
-
-    public File dumpAllTables(String database) {
-        //TODO Need to dump all tables within specified schema
-        return null;
-    }
-
     /**
-     * Convenience method for objects created with schema - calls dumpCreateTable
+     * Convenience method for objects created with schema - calls getCreateTable
      *
      * @param event Event to dump
      * @return Create event definition
      */
-    public String dumpCreateEvent(String event) {
-        return dumpCreateEvent(schema, event);
+    @Override
+    public String getCreateEvent(String event) {
+        return getCreateEvent(schema, event);
     }
 
     /**
@@ -251,7 +239,8 @@ public class MySQLInstance implements Instance {
      * @param event  Event name
      * @return Create event definition
      */
-    public String dumpCreateEvent(String schema, String event) {
+    @Override
+    public String getCreateEvent(String schema, String event) {
         String createEvent = "--\n-- Event structure for event `" + event + "`\n--\n\n";
         try {
             Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -272,6 +261,7 @@ public class MySQLInstance implements Instance {
      * @param routine Routine to dump
      * @return Create routine definition
      */
+    @Override
     public String getCreateRoutine(String routine) {
         return getCreateRoutine(schema, routine);
     }
@@ -283,6 +273,7 @@ public class MySQLInstance implements Instance {
      * @param routine  Routine name
      * @return Create routine definition
      */
+    @Override
     public String getCreateRoutine(String schema, String routine) {
         String createRoutine = "--\n-- Routine structure for routine `" + routine + "`\n--\n\n";
         try {
@@ -310,6 +301,7 @@ public class MySQLInstance implements Instance {
      * @param table Table to dump
      * @return Create table definition
      */
+    @Override
     public String getCreateTable(String table) {
         return getCreateTable(schema, table);
     }
@@ -321,13 +313,13 @@ public class MySQLInstance implements Instance {
      * @param table  Table name
      * @return Create table definition
      */
+    @Override
     public String getCreateTable(String schema, String table) {
         String createTable = "--\n-- Table structure for table `" + table + "`\n--\n\n";
         try {
-            PreparedStatement stmt = conn.prepareStatement(convertStreamToString(getClass().getResourceAsStream("getCreateTable.sql")),ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            stmt.setString(1, schema);
-            stmt.setString(2, table);
-            ResultSet rs = stmt.executeQuery();
+            Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            stmt.executeQuery("SHOW CREATE TABLE `" + schema + "`.`" + table + "`");
+            ResultSet rs = stmt.getResultSet();
             while (rs.next()) {
                 createTable += rs.getString("Create Table") + ";";
             }
@@ -343,13 +335,14 @@ public class MySQLInstance implements Instance {
     }
 
     /**
-     * Convenience method for objects created with schema - calls dumpCreateTrigger
+     * Convenience method for objects created with schema - calls getCreateTrigger
      *
      * @param  trigger Trigger name
      * @return Create trigger definition
      */
-    public String dumpCreateTrigger(String trigger) {
-        return dumpCreateTrigger(schema, trigger);
+    @Override
+    public String getCreateTrigger(String trigger) {
+        return getCreateTrigger(schema, trigger);
     }
 
     /**
@@ -359,7 +352,8 @@ public class MySQLInstance implements Instance {
      * @param trigger  Trigger name
      * @return Create trigger definition
      */
-    public String dumpCreateTrigger(String schema, String trigger) {
+    @Override
+    public String getCreateTrigger(String schema, String trigger) {
         String createTrigger = "--\n-- Trigger structure for trigger `" + trigger + "`\n--\n\n";
         try {
             Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -381,6 +375,7 @@ public class MySQLInstance implements Instance {
      * @param  view View name
      * @return Create view definition
      */
+    @Override
     public String getCreateView(String view) {
         return getCreateView(schema, view);
     }
@@ -392,6 +387,7 @@ public class MySQLInstance implements Instance {
      * @param table  Table name
      * @return Create table definition
      */
+    @Override
     public String getCreateView(String schema, String view) {
         String createView = "--\n-- View definition for view `" + view + "`\n--\n\n";
         try {
@@ -470,7 +466,8 @@ public class MySQLInstance implements Instance {
         }
     }
 
-    public Map<String, String> dumpGlobalVariables() {
+    @Override
+    public Map<String, String> getGlobalVariables() {
         Map<String, String> variables = new TreeMap();
         try {
             Statement s = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -485,20 +482,13 @@ public class MySQLInstance implements Instance {
         return variables;
     }
 
-    public File dumpAllViews(String database) {
-        return null;
-    }
-
-    public File dumpView(String view) {
-        return null;
-    }
-
     /**
      * Execute SQL script
      *
      * @param  schema Schema name
      * @param  script SQL Script
      */
+    @Override
     public String executeScript(String schema, BufferedReader script) {
         String result = "";
         String line;
@@ -544,6 +534,7 @@ public class MySQLInstance implements Instance {
      *
      * @return MySQLInstance version
      */
+    @Override
     public String getVersion() {
         return properties.getProperty("application.version");
     }
@@ -554,6 +545,7 @@ public class MySQLInstance implements Instance {
      * @param schema Schema name
      * @return List of events
      */
+    @Override
     public ArrayList<String> listEvents(String schema) {
         ArrayList<String> events = new ArrayList();
         try {
@@ -577,6 +569,7 @@ public class MySQLInstance implements Instance {
      *
      * @return List of grant tables
      */
+    @Override
     public ArrayList<String> listGrantTables() {
         ArrayList<String> grantTables = new ArrayList();
         grantTables.add("user");
@@ -596,6 +589,7 @@ public class MySQLInstance implements Instance {
      * @param schema Schema name
      * @return List of routines
      */
+    @Override
     public ArrayList<String> listRoutines(String schema) {
         ArrayList<String> routines = new ArrayList();
         //Triggers were included beginning with MySQL 5.0.2
@@ -621,6 +615,7 @@ public class MySQLInstance implements Instance {
      *
      * @return List of schemata
      */
+    @Override
     public ArrayList<String> listSchemata() {
         ArrayList<String> schemata = new ArrayList();
         try {
@@ -646,6 +641,7 @@ public class MySQLInstance implements Instance {
      * @param schema Schema name
      * @return List of tables
      */
+    @Override
     public ArrayList<String> listTables(String schema) {
         ArrayList<String> tables = new ArrayList();
         try {
@@ -673,6 +669,7 @@ public class MySQLInstance implements Instance {
      * @param schema Schema name
      * @return List of triggers
      */
+    @Override
     public ArrayList<String> listTriggers(String schema) {
         ArrayList<String> triggers = new ArrayList();
         //Triggers were included beginning with MySQL 5.0.2
@@ -699,6 +696,7 @@ public class MySQLInstance implements Instance {
      * @param  schema Schema name
      * @return List of views
      */
+    @Override
     public ArrayList<String> listViews(String schema) {
         ArrayList<String> views = new ArrayList();
         try {
@@ -726,6 +724,7 @@ public class MySQLInstance implements Instance {
      *
      * @return Currently set schema
      */
+    @Override
     public String getSchema() {
         return schema;
     }
@@ -735,6 +734,7 @@ public class MySQLInstance implements Instance {
      *
      * @param  schema Schema name
      */
+    @Override
     public void setSchema(String schema) {
         this.schema = schema;
         try {
@@ -750,7 +750,7 @@ public class MySQLInstance implements Instance {
      * @param  bIn       String to be converted to hex passed in as byte array
      * @return bOut      MySQL compatible hex string
      */
-    public static String byteArrayToHexString(byte[] bIn) {
+    private static String byteArrayToHexString(byte[] bIn) {
         StringBuilder sb = new StringBuilder(bIn.length * 2);
         for (int i = 0; i < bIn.length; i++) {
             int v = bIn[i] & 0xff;
@@ -836,7 +836,7 @@ public class MySQLInstance implements Instance {
      * 
      * @return String
      */  
-    public static String convertStreamToString(InputStream is) throws Exception {
+    private static String convertStreamToString(InputStream is) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
         String line = null;
@@ -852,6 +852,7 @@ public class MySQLInstance implements Instance {
      *
      * @return Application status code
      */
+    @Override
     public int cleanup() {
         try {
             conn.close();

@@ -4,4 +4,4 @@
 * @param  table     Table Name
 * @returns 
 */
-SHOW CREATE TABLE ?.?
+SHOW CREATE TABLE `?`.`?`

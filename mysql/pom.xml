@@ -55,6 +55,8 @@
                         <Bundle-Vendor>Wave2 Limited</Bundle-Vendor>
                         <Bundle-Activator>org.dbinterrogator.mysql.Activator</Bundle-Activator>
                         <Include-Resource>{maven-resources},META-INF/LICENSE=LICENSE</Include-Resource>
+                        <Export-Package>org.dbinterrogator.mysql.Instance</Export-Package>
+                        <Private-Package>org.dbinterrogator.mysql.*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
