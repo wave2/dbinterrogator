@@ -249,7 +249,7 @@ public class CheckDB {
         parsedQuery = "SELECT 0";
         if (queryFile != null) {
             try {
-                convertStreamToString(new FileInputStream(queryFile));
+                return convertStreamToString(new FileInputStream(queryFile));
             } catch (java.lang.Exception jle) {
                 System.out.println(jle.getMessage());
             }
