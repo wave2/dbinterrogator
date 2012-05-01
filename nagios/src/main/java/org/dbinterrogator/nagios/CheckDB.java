@@ -181,9 +181,9 @@ public class CheckDB {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                System.out.println("UNKNOWN: " + e.getMessage());
             } catch (java.lang.Exception jle) {
-                System.out.println(jle.getMessage());
+                System.out.println("UNKNOWN: " + jle.getMessage());
             }
         } else {
 
@@ -204,13 +204,20 @@ public class CheckDB {
                 stmt.close();
                 conn.close();
             } catch (SQLException e) {
-                System.out.println(e.getMessage());
+                System.out.println("UNKNOWN: " + e.getMessage());
             } catch (java.lang.Exception jle) {
-                System.out.println(jle.getMessage());
+                System.out.println("UNKNOWN: " + jle.getMessage());
             }
         }
         if (queryResult != null){
-            System.out.print(queryMessage);
+            switch (checkThresholds(queryResult)) {
+                case NAGIOS_CRITICAL: System.out.print("CRITICAL: " + queryResult + " - " + queryMessage);
+                    break;
+                case NAGIOS_WARNING: System.out.print("WARNING: " + queryResult + " - " + queryMessage);
+                    break;
+                case NAGIOS_OK: System.out.print("OK: " + queryResult + " - " + queryMessage);
+                    break;
+            }
             System.exit(checkThresholds(queryResult));
         } else {
                 System.exit(NAGIOS_UNKNOWN);
