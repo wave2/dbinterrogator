@@ -99,7 +99,7 @@ public class CheckDB {
     void doMain(String[] args) {
         Integer queryResult = null;
         String queryMessage = "";
-        String usage = "Usage: java -jar CheckDB.jar [-v]\nOptions:\n    -h  hostname\n    -p  port\n    -s  SID / Instance\n    -u  username\n    -P  password\n    -f  Path to query file\n    -v  Generate verbose output on standard output\n    -c  Critical threshold\n    -w  Warning threshold";
+        String usage = "Usage: java -jar NagiosCheckDB.jar [-v]\nOptions:\n    -h  hostname\n    -p  port\n    -s  SID / Instance\n    -u  username\n    -P  password\n    -f  Path to query file\n    -v  Generate verbose output on standard output\n    -c  Critical threshold\n    -w  Warning threshold";
         CmdLineParser parser = new CmdLineParser(this);
 
         // if you have a wider console, you could increase the value;

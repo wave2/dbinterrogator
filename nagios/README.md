@@ -1,21 +1,34 @@
-dbInterrogator
+Nagios CheckDB Plugin
 ==============
 
-A collection of OSGi services (in limbo) that provide interrogation methods for common database
-platforms.
-
-What started life as a java alternative to MySQLDump soon evolved into a support
-library for dbRecorder, a database versioning tool.
-
-Over time I have been slowly adding support for other database platforms and so I
-decided it was time to wrap up the individual libraries into something more
-coherent, hence the umbrella project - dbInterrogator.
+A console application that can be used to perform a database query
+and alert based on a numerical response.
 
 Requirements
 ------------
 
 * Java 1.6 (or above)
 * Maven 3
+
+Installation
+------------
+
+Usage
+-----
+
+    Usage: java -jar NagiosCheckDB.jar [options]
+    Options:
+        -d  RDBMS Type [oracle, mssql]
+        -h  Hostname
+        -p  Port
+        -s  SID / Instance
+        -u  Username
+        -P  Password
+        -f  Path to query file (must return an int and a string)
+        -q  Query to execute (must return an int and a string)
+        -v  Generate verbose output on standard output
+        -c  Critical threshold
+        -w  Warning threshold
 
 Contributing
 ------------
