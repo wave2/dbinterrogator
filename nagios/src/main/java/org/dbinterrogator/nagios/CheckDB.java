@@ -168,7 +168,7 @@ public class CheckDB {
             try {
 
                 Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                String URL = "jdbc:sqlserver://" + hostname + ";database=" + sid + ";user=" + username + ";password=" + password;
+                String URL = "jdbc:sqlserver://" + hostname + "\\" + sid + ";user=" + username + ";password=" + password;
                 Connection conn = DriverManager.getConnection(URL);
                 conn.setAutoCommit(false);
                 conn.setReadOnly(true);
