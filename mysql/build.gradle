@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':service')
+    implementation('mysql:mysql-connector-java:5.1.45')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'mysql.hostname', System.getProperty('mysql.hostname')
+    systemProperty 'mysql.username', System.getProperty('mysql.username')
+    systemProperty 'mysql.password', System.getProperty('mysql.password')
+}
+
+ext.moduleName = 'com.dbinterrogator.mysql'
+

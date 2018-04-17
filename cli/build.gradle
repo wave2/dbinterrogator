@@ -1,0 +1,62 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+import java.util.regex.Matcher;
+
+dependencies {
+    implementation project(':service')
+    implementation 'ch.qos.logback:logback-core:1.3+'
+    implementation 'ch.qos.logback:logback-classic:1.3+'
+    implementation 'org.slf4j:slf4j-api:1.8+'
+    implementation 'info.picocli:picocli:3.0+'
+
+    runtimeOnly project(':mysql')
+}
+
+ext.moduleName = 'com.dbinterrogator.cli'
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.dbinterrogator.cli.Main'
+        )
+    }
+}
+
+mainClassName = "$moduleName/com.dbinterrogator.cli.Main"
+
+run {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--module', mainClassName
+        ]
+        classpath = files()
+    }
+    if(System.getProperty("exec.args") != null) {
+        args System.getProperty("exec.args").split()
+    }
+}
+
+startScripts {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        classpath = files()
+        defaultJvmOpts = [
+                '--module-path', 'APP_HOME_LIBS',
+                '--module', mainClassName
+        ]
+    }
+    doLast{
+        def bashFile = new File(outputDir, applicationName)
+        String bashContent = bashFile.text
+        bashFile.text = bashContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('$APP_HOME/lib'))
+
+        def batFile = new File(outputDir, applicationName + ".bat")
+        String batContent = batFile.text
+        batFile.text = batContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('%APP_HOME%\\lib'))
+    }
+}

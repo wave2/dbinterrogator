@@ -1,0 +1,6 @@
+rootProject.name = 'dbinterrogator'
+
+include 'service'
+include 'mysql'
+include 'cli'
+

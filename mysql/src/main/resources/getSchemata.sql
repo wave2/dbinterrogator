@@ -1,0 +1,4 @@
+/**
+* Retrieve schema information
+*/
+SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA
