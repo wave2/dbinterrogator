@@ -1,4 +1,8 @@
-target/
-nbactions.xml
-nb-configuration.xml
-.idea/
+# IntelliJ
+.idea
+**/out/
+
+# Gradle
+.gradle
+**/build/
+
