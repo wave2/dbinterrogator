@@ -30,10 +30,10 @@ import java.util.ArrayList;
 
 class MySQLInterrogatorTest {
 
-    static MySQLInterrogator interrogator = new MySQLInterrogator();
-    static String hostname;
-    static String username;
-    static String password;
+    private static MySQLInterrogator interrogator = new MySQLInterrogator();
+    private static String hostname;
+    private static String username;
+    private static String password;
 
     @BeforeAll
     static void initAll() {
@@ -48,5 +48,12 @@ class MySQLInterrogatorTest {
         ArrayList<String> schemata = interrogator.getSchemata();
         assertEquals("information_schema", schemata.get(0));
         System.out.println(schemata);
+    }
+
+    @Test
+    void getTablesTest() {
+        ArrayList<String> tables = interrogator.getTables("information_schema");
+        assertEquals("CHARACTER_SETS", tables.get(0));
+        System.out.println(tables);
     }
 }
